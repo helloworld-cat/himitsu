@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"github.com/gorilla/mux"
 	"github.com/pagedegeek/himitsu"
 	"github.com/pagedegeek/himitsu/crypto_engine"
 	"github.com/pagedegeek/himitsu/data_access"
@@ -9,6 +10,11 @@ import (
 	"github.com/pagedegeek/himitsu/salt_generation"
 	"github.com/pagedegeek/himitsu/uuid_generation"
 	"log"
+	"net/http"
+)
+
+var (
+	h *himitsu.Himitsu
 )
 
 func main() {
@@ -22,28 +28,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	himitsu := himitsu.NewHimitsu(
-		saltGenerator,
-		uuidGenerator,
-		pwdDerivator,
-		cryptoEngine,
-		dataAccess)
+	h = himitsu.NewHimitsu(saltGenerator, uuidGenerator, pwdDerivator,
+		cryptoEngine, dataAccess)
 
-	repoUUID, userAccountUUID, err := himitsu.CreateRepository(
-		"main", "sam", "foobarbaz")
-	if err != nil {
-		log.Fatal(err)
+	router := mux.NewRouter()
+	router.HandleFunc("/repositories", handleCreateRepository).
+		Methods("POST", "PUT")
+	router.HandleFunc("/secrets", handleCreateSecret).
+		Methods("POST", "PUT")
+	router.HandleFunc("/secrets", handleListSecrets).
+		Methods("GET")
+	router.HandleFunc("/secrets/{secret_name}", handleReadSecret).
+		Methods("GET")
+
+	certFile := "../public_key"
+	keyFile := "../private_key"
+	server := http.Server{Addr: ":8443", Handler: router}
+	if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+		log.Fatal("Can't start server: %s", err.Error())
+		return
 	}
-	log.Printf("Repository uuid: %s", repoUUID)
-	log.Printf("user uuid: %s", userAccountUUID)
-
-	// repoUUID := "48aa8e49-59d0-477b-a6f7-597081731b6c"
-	// userAccountUUID := "c1366365-7333-472f-928f-ea2a861776dd"
-
-	secret, err := himitsu.ReadSecret(
-		repoUUID, userAccountUUID, "foobarbaz", "hello")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("secret: %s", secret)
 }
