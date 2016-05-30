@@ -1,4 +1,4 @@
-package salt_generation
+package himitsu
 
 type SaltGenerator interface {
 	Call(size int) ([]byte, error)

@@ -1,4 +1,4 @@
-package uuid_generation
+package himitsu
 
 import (
 	"github.com/satori/go.uuid"

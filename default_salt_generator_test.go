@@ -1,4 +1,4 @@
-package salt_generation
+package himitsu
 
 import (
 	"encoding/base64"

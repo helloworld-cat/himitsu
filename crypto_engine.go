@@ -1,4 +1,4 @@
-package crypto_engine
+package himitsu
 
 type CryptoEngine interface {
 	Encrypt(msg []byte, key, iv []byte) ([]byte, error)

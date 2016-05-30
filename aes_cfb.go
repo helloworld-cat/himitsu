@@ -1,4 +1,4 @@
-package crypto_engine
+package himitsu
 
 import (
 	"crypto/aes"

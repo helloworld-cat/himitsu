@@ -1,4 +1,4 @@
-package uuid_generation
+package himitsu
 
 type UUIDGenerator interface {
 	Call() string
